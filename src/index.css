@@ -180,3 +180,11 @@ ol[role="list"] {
     bottom: 18vmin;
   }
 }
+
+/* useAlert.tsx */
+.alert-btn {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+}
