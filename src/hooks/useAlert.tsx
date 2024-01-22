@@ -1,16 +1,6 @@
 import { SnackbarKey, useSnackbar } from "notistack";
 import { MdClose } from "react-icons/md";
-
-type TAlertOptions = {
-  autoHideDuration?: number;
-  variant?: "info" | "default" | "error" | "success" | "warning" | undefined;
-  anchorOrigin?: {
-    horizontal: "left" | "center" | "right";
-    vertical: "top" | "bottom";
-  };
-};
-
-type TAlert = (message: string, options?: TAlertOptions) => SnackbarKey;
+import { TAlert } from "../utils/types";
 
 function useAlert() {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -25,7 +15,7 @@ function useAlert() {
     const key = enqueueSnackbar(message, {
       autoHideDuration: options?.autoHideDuration
         ? options.autoHideDuration
-        : 5000,
+        : 3000,
       variant: options?.variant ? options.variant : "info",
       anchorOrigin: options?.anchorOrigin
         ? options.anchorOrigin

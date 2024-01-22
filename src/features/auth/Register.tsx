@@ -4,24 +4,61 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { emailRegex } from "../../utils/regex";
-
-interface IFormInputs {
-  username: string;
-  email: string;
-  password: string;
-}
+import { useAppTheme } from "../../mui/hooks";
+import { IRegisterFormInputs } from "../../utils/types";
+import { useAlert } from "../../hooks/useAlert";
+import { Link, useNavigate } from "react-router-dom";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { getErrorMessage } from "../../utils/errorMessage";
+import { useState } from "react";
+import { auth, db } from "../../firebase/firebase";
+import { ref, set } from "firebase/database";
 
 function Register() {
   const {
     register,
+    reset,
     handleSubmit,
+    getValues,
     formState: { errors },
-  } = useForm<IFormInputs>();
+  } = useForm<IRegisterFormInputs>({
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      password2: "",
+    },
+  });
+  const theme = useAppTheme();
+  const { showAlert } = useAlert();
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const onSubmit: SubmitHandler<IFormInputs> = (data) => {
-    console.log(data);
+  const onSubmit: SubmitHandler<IRegisterFormInputs> = async (data) => {
+    if (getValues("password") !== getValues("password2")) {
+      showAlert("Password Mismatch", { variant: "error" });
+      return;
+    }
+    setLoading(true);
+    const { email, password, username } = data;
+    await createUserWithEmailAndPassword(auth, email, password)
+      .then(async (userCredential) => {
+        const user = userCredential.user;
+        await set(ref(db, "users/" + user.uid), {
+          username: username,
+          email: email,
+        });
+        reset();
+        showAlert("Registered successfully", { variant: "success" });
+        navigate("/login");
+      })
+      .catch((error: unknown) => {
+        showAlert(getErrorMessage(error), { variant: "error" });
+      });
+    setLoading(false);
   };
 
   return (
@@ -97,6 +134,24 @@ function Register() {
             }}
             type="password"
           />
+          <TextField
+            error={!!errors.password2}
+            id="password2-input"
+            label="Confirm Password"
+            helperText={errors.password2?.message}
+            {...register("password2", {
+              required: "Enter confirm password",
+              minLength: {
+                value: 8,
+                message: "Password must be at least 8 characters",
+              },
+            })}
+            fullWidth={true}
+            sx={{
+              marginBottom: "1.5em",
+            }}
+            type="password"
+          />
           <Button
             variant="contained"
             type="submit"
@@ -107,8 +162,32 @@ function Register() {
               fontWeight: 600,
             }}
           >
-            Register
+            {!loading ? (
+              <Box component="span">Register</Box>
+            ) : (
+              <Box
+                sx={{ display: "flex" }}
+                color={theme.palette.background.default}
+              >
+                <CircularProgress color="inherit" />
+              </Box>
+            )}
           </Button>
+          <Typography align="center" marginTop={1}>
+            Already have an account?
+            <Link to="/login">
+              <Button
+                sx={{
+                  paddingBlock: 0,
+                  paddingInline: ".3em",
+                  minWidth: "max-content",
+                  fontWeight: 600,
+                }}
+              >
+                Login
+              </Button>
+            </Link>
+          </Typography>
         </Box>
       </Card>
     </Container>

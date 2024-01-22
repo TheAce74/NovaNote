@@ -8,47 +8,32 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { emailRegex } from "../../utils/regex";
 import { useAppTheme } from "../../mui/hooks";
-import { ILoginFormInputs } from "../../utils/types";
-import { Link, useNavigate } from "react-router-dom";
-import { getErrorMessage } from "../../utils/errorMessage";
+import { IResetPasswordFormInput } from "../../utils/types";
 import { useAlert } from "../../hooks/useAlert";
+import { Link } from "react-router-dom";
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase/firebase";
-import { useFireBase } from "../../firebase/hooks";
 
-function Login() {
+function ResetPassword() {
   const {
     register,
     reset,
     handleSubmit,
     formState: { errors },
-  } = useForm<ILoginFormInputs>({
+  } = useForm<IResetPasswordFormInput>({
     defaultValues: {
       email: "",
-      password: "",
     },
   });
   const theme = useAppTheme();
   const { showAlert } = useAlert();
   const [loading, setLoading] = useState(false);
-  const { getFireBaseUserDetails } = useFireBase();
-  const navigate = useNavigate();
 
-  const onSubmit: SubmitHandler<ILoginFormInputs> = async (data) => {
+  const onSubmit: SubmitHandler<IResetPasswordFormInput> = async (data) => {
     setLoading(true);
-    const { email, password } = data;
-    await signInWithEmailAndPassword(auth, email, password)
-      .then(async (userCredential) => {
-        const user = userCredential.user;
-        await getFireBaseUserDetails(user.uid);
-        showAlert("Logged in successfully", { variant: "success" });
-        navigate("/");
-        reset();
-      })
-      .catch((error: unknown) => {
-        showAlert(getErrorMessage(error), { variant: "error" });
-      });
+    const { email } = data;
+    console.log(email);
+    showAlert("A reset email was sent to your mailbox");
+    reset();
     setLoading(false);
   };
 
@@ -94,24 +79,6 @@ function Login() {
               marginBottom: "1.5em",
             }}
           />
-          <TextField
-            error={!!errors.password}
-            id="password-input"
-            label="Password"
-            helperText={errors.password?.message}
-            {...register("password", {
-              required: "Enter password",
-              minLength: {
-                value: 8,
-                message: "Password must be at least 8 characters",
-              },
-            })}
-            fullWidth={true}
-            sx={{
-              marginBottom: "1.5em",
-            }}
-            type="password"
-          />
           <Button
             variant="contained"
             type="submit"
@@ -123,7 +90,7 @@ function Login() {
             }}
           >
             {!loading ? (
-              <Box component="span">Login</Box>
+              <Box component="span">Reset Password</Box>
             ) : (
               <Box
                 sx={{ display: "flex" }}
@@ -134,8 +101,8 @@ function Login() {
             )}
           </Button>
           <Typography align="center" marginTop={1}>
-            Don't have an account?
-            <Link to="/register">
+            Ready to login?
+            <Link to="/login">
               <Button
                 sx={{
                   paddingBlock: 0,
@@ -144,22 +111,7 @@ function Login() {
                   fontWeight: 600,
                 }}
               >
-                Register
-              </Button>
-            </Link>
-          </Typography>
-          <Typography align="center">
-            Forgot password?
-            <Link to="/reset">
-              <Button
-                sx={{
-                  paddingBlock: 0,
-                  paddingInline: ".3em",
-                  minWidth: "max-content",
-                  fontWeight: 600,
-                }}
-              >
-                Reset password
+                Login
               </Button>
             </Link>
           </Typography>
@@ -169,4 +121,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default ResetPassword;

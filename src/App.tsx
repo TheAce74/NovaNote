@@ -8,6 +8,8 @@ import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import { ThemeProvider } from "@mui/material/styles";
 import { theme } from "./mui/theme";
+import ResetPassword from "./features/auth/ResetPassword";
+import Protected from "./features/guard/Protected";
 
 function App() {
   const router = createBrowserRouter([
@@ -25,6 +27,14 @@ function App() {
       children: [
         {
           path: "/",
+          element: (
+            <Protected>
+              <Dashboard />
+            </Protected>
+          ),
+        },
+        {
+          path: "/register",
           element: <Register />,
         },
         {
@@ -32,8 +42,8 @@ function App() {
           element: <Login />,
         },
         {
-          path: "/dashboard",
-          element: <Dashboard />,
+          path: "/reset",
+          element: <ResetPassword />,
         },
       ],
     },

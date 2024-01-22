@@ -1,5 +1,8 @@
+import { useAppSelector } from "../../redux/hooks";
+
 function Dashboard() {
-  return <h1>Dashboard</h1>;
+  const user = useAppSelector((state) => state.user);
+  return <h1>Welcome {user.username}</h1>;
 }
 
 export default Dashboard;
