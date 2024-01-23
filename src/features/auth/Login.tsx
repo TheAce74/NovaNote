@@ -15,7 +15,6 @@ import { useAlert } from "../../hooks/useAlert";
 import { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase/firebase";
-import { useFireBase } from "../../firebase/hooks";
 
 function Login() {
   const {
@@ -32,16 +31,13 @@ function Login() {
   const theme = useAppTheme();
   const { showAlert } = useAlert();
   const [loading, setLoading] = useState(false);
-  const { getFireBaseUserDetails } = useFireBase();
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<ILoginFormInputs> = async (data) => {
     setLoading(true);
     const { email, password } = data;
     await signInWithEmailAndPassword(auth, email, password)
-      .then(async (userCredential) => {
-        const user = userCredential.user;
-        await getFireBaseUserDetails(user.uid);
+      .then(async () => {
         showAlert("Logged in successfully", { variant: "success" });
         navigate("/");
         reset();

@@ -33,9 +33,16 @@ export interface IUser {
   id: string | null;
   username: string | null;
   email: string | null;
+  emailVerified: boolean;
+  creationTime: string | undefined;
 }
 
-export interface FireBaseSnapShot {
+export interface IFireBaseSnapShot {
   username: string;
-  email: string;
+  emailVerified: boolean;
+}
+
+export interface IVerifyUser {
+  id: string;
+  username: string;
 }

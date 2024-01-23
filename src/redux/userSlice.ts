@@ -6,6 +6,8 @@ const initialState: IUser = {
   id: null,
   username: null,
   email: null,
+  emailVerified: false,
+  creationTime: undefined,
 };
 
 export const userSlice = createSlice({
@@ -13,7 +15,7 @@ export const userSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action: PayloadAction<IUser>) => {
-      return state = action.payload;
+      return (state = action.payload);
     },
   },
 });

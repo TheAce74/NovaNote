@@ -23,9 +23,23 @@ function Protected({ children }: ProtectedProps) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        await getFireBaseUserDetails(user.uid);
+        console.log(user);
+        const {
+          uid,
+          email,
+          metadata: { creationTime },
+        } = user;
+        await getFireBaseUserDetails(uid, email, creationTime);
       } else {
-        dispatch(setUser({ id: null, email: null, username: null }));
+        dispatch(
+          setUser({
+            id: null,
+            email: null,
+            username: null,
+            emailVerified: false,
+            creationTime: undefined,
+          })
+        );
         navigate("/login");
       }
     });

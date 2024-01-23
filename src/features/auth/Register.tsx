@@ -10,12 +10,16 @@ import { emailRegex } from "../../utils/regex";
 import { useAppTheme } from "../../mui/hooks";
 import { IRegisterFormInputs } from "../../utils/types";
 import { useAlert } from "../../hooks/useAlert";
-import { Link, useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { Link } from "react-router-dom";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import { getErrorMessage } from "../../utils/errorMessage";
 import { useState } from "react";
-import { auth, db } from "../../firebase/firebase";
-import { ref, set } from "firebase/database";
+import { auth } from "../../firebase/firebase";
+import { useFireBase } from "../../firebase/hooks";
+import { setItem } from "../../utils/localStorage";
 
 function Register() {
   const {
@@ -35,7 +39,7 @@ function Register() {
   const theme = useAppTheme();
   const { showAlert } = useAlert();
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const { setFireBaseUserDetails } = useFireBase();
 
   const onSubmit: SubmitHandler<IRegisterFormInputs> = async (data) => {
     if (getValues("password") !== getValues("password2")) {
@@ -47,13 +51,19 @@ function Register() {
     await createUserWithEmailAndPassword(auth, email, password)
       .then(async (userCredential) => {
         const user = userCredential.user;
-        await set(ref(db, "users/" + user.uid), {
+        setItem("user", {
+          id: user.uid,
           username: username,
-          email: email,
+        });
+        await setFireBaseUserDetails(user.uid, {
+          username: username,
+          emailVerified: false,
+        });
+        const currentUser = auth.currentUser ? auth.currentUser : user;
+        await sendEmailVerification(currentUser).then(() => {
+          showAlert("A verification email was sent to your inbox");
         });
         reset();
-        showAlert("Registered successfully", { variant: "success" });
-        navigate("/login");
       })
       .catch((error: unknown) => {
         showAlert(getErrorMessage(error), { variant: "error" });
