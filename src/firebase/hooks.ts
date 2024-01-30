@@ -1,5 +1,10 @@
 import { ref, child, get, set } from "firebase/database";
-import { deleteUser } from "firebase/auth";
+import {
+  deleteUser,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
+} from "firebase/auth";
 import { db, auth } from "./firebase";
 import { getErrorMessage } from "../utils/errorMessage";
 import { useAlert } from "../hooks/useAlert";
@@ -14,14 +19,14 @@ function useFireBase() {
   const getFireBaseUserDetails = async (
     id: string,
     email: string | null,
+    emailVerified: boolean,
     creationTime: string | undefined
   ) => {
     const dbRef = ref(db);
     await get(child(dbRef, `users/${id}`))
       .then(async (snapshot) => {
         if (snapshot.exists()) {
-          const { username, emailVerified } =
-            snapshot.val() as IFireBaseSnapShot;
+          const { username } = snapshot.val() as IFireBaseSnapShot;
           dispatch(
             setUser({
               id,
@@ -63,7 +68,49 @@ function useFireBase() {
       });
   };
 
-  return { getFireBaseUserDetails, setFireBaseUserDetails };
+  //unused
+  const reAuthenticateUser = async (
+    email: string,
+    password: string,
+    callback: () => void
+  ) => {
+    const credential = EmailAuthProvider.credential(email, password);
+    const user = auth.currentUser;
+    if (user) {
+      await reauthenticateWithCredential(user, credential)
+        .then(() => {
+          callback();
+        })
+        .catch((error) => {
+          showAlert(getErrorMessage(error), { variant: "error" });
+        });
+    } else {
+      showAlert("User not found", { variant: "error" });
+    }
+  };
+
+  //unused
+  const changeUserPassword = async (newPassword: string) => {
+    const user = auth.currentUser;
+    if (user) {
+      await updatePassword(user, newPassword)
+        .then(() => {
+          showAlert("Password changed successfully", { variant: "success" });
+        })
+        .catch((error) => {
+          showAlert(getErrorMessage(error), { variant: "error" });
+        });
+    } else {
+      showAlert("User not found", { variant: "error" });
+    }
+  };
+
+  return {
+    getFireBaseUserDetails,
+    setFireBaseUserDetails,
+    reAuthenticateUser,
+    changeUserPassword,
+  };
 }
 
 export { useFireBase };

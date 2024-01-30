@@ -12,6 +12,9 @@ import { IResetPasswordFormInput } from "../../utils/types";
 import { useAlert } from "../../hooks/useAlert";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../../firebase/firebase";
+import { getErrorMessage } from "../../utils/errorMessage";
 
 function ResetPassword() {
   const {
@@ -31,9 +34,14 @@ function ResetPassword() {
   const onSubmit: SubmitHandler<IResetPasswordFormInput> = async (data) => {
     setLoading(true);
     const { email } = data;
-    console.log(email);
-    showAlert("A reset email was sent to your mailbox");
-    reset();
+    await sendPasswordResetEmail(auth, email)
+      .then(() => {
+        showAlert("A reset email was sent to your mailbox");
+        reset();
+      })
+      .catch((error) => {
+        showAlert(getErrorMessage(error), { variant: "error" });
+      });
     setLoading(false);
   };
 

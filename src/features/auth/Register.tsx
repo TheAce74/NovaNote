@@ -19,7 +19,10 @@ import { getErrorMessage } from "../../utils/errorMessage";
 import { useState } from "react";
 import { auth } from "../../firebase/firebase";
 import { useFireBase } from "../../firebase/hooks";
-import { setItem } from "../../utils/localStorage";
+import InputAdornment from "@mui/material/InputAdornment";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import IconButton from "@mui/material/IconButton";
 
 function Register() {
   const {
@@ -40,6 +43,12 @@ function Register() {
   const { showAlert } = useAlert();
   const [loading, setLoading] = useState(false);
   const { setFireBaseUserDetails } = useFireBase();
+  const [showPassword1, setShowPassword1] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
+
+  const handleClickShowPassword1 = () => setShowPassword1((show) => !show);
+
+  const handleClickShowPassword2 = () => setShowPassword2((show) => !show);
 
   const onSubmit: SubmitHandler<IRegisterFormInputs> = async (data) => {
     if (getValues("password") !== getValues("password2")) {
@@ -51,13 +60,8 @@ function Register() {
     await createUserWithEmailAndPassword(auth, email, password)
       .then(async (userCredential) => {
         const user = userCredential.user;
-        setItem("user", {
-          id: user.uid,
-          username: username,
-        });
         await setFireBaseUserDetails(user.uid, {
           username: username,
-          emailVerified: false,
         });
         const currentUser = auth.currentUser ? auth.currentUser : user;
         await sendEmailVerification(currentUser).then(() => {
@@ -142,7 +146,25 @@ function Register() {
             sx={{
               marginBottom: "1.5em",
             }}
-            type="password"
+            type={showPassword1 ? "text" : "password"}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment
+                  position="end"
+                  sx={{
+                    marginRight: ".2em",
+                  }}
+                >
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword1}
+                    edge="end"
+                  >
+                    {showPassword1 ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <TextField
             error={!!errors.password2}
@@ -160,7 +182,25 @@ function Register() {
             sx={{
               marginBottom: "1.5em",
             }}
-            type="password"
+            type={showPassword2 ? "text" : "password"}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment
+                  position="end"
+                  sx={{
+                    marginRight: ".2em",
+                  }}
+                >
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword2}
+                    edge="end"
+                  >
+                    {showPassword2 ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <Button
             variant="contained"

@@ -3,25 +3,65 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Lottie from "lottie-react";
 import success from "../../data/success.json";
-import { useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { useFireBase } from "../../firebase/hooks";
-import { getItem, removeItem } from "../../utils/localStorage";
-import { IVerifyUser } from "../../utils/types";
+import { useEffect, useCallback, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import queryString from "query-string";
+import { useAlert } from "../../hooks/useAlert";
+import { applyActionCode } from "firebase/auth";
+import { auth } from "../../firebase/firebase";
+import { getErrorMessage } from "../../utils/errorMessage";
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
+import { useAppTheme } from "../../mui/hooks";
 
 function Verify() {
   const navigate = useNavigate();
-  const { setFireBaseUserDetails } = useFireBase();
+  const location = useLocation();
+  const { showAlert } = useAlert();
+  const theme = useAppTheme();
+  const [openBackDrop, setOpenBackDrop] = useState(true);
 
   const updateVerificationStatus = useCallback(async () => {
-    const { id, username } = getItem("user") as IVerifyUser;
-    await setFireBaseUserDetails(id, {
-      username: username,
-      emailVerified: true,
-    });
-    removeItem("user");
-    navigate("/login");
-  }, [setFireBaseUserDetails, navigate]);
+    const parsed = queryString.parse(location.search);
+    switch (parsed.mode) {
+      case "resetPassword":
+        navigate("/confirmReset", {
+          state: {
+            actionCode: parsed.oobCode,
+          },
+        });
+        break;
+      case "recoverEmail":
+        navigate("/recoverEmail", {
+          state: {
+            actionCode: parsed.oobCode,
+            lang: parsed.lang || "en",
+          },
+        });
+        break;
+      case "verifyEmail":
+        setOpenBackDrop(false);
+        if (typeof parsed.oobCode === "string") {
+          await applyActionCode(auth, parsed.oobCode)
+            .then(() => {
+              showAlert("Email verified successfully", {
+                variant: "success",
+              });
+            })
+            .catch((error) => {
+              showAlert(getErrorMessage(error), {
+                variant: "error",
+              });
+            });
+          navigate("/login");
+        }
+        break;
+      default:
+        showAlert("An unexpected error occurred, try again later", {
+          variant: "error",
+        });
+    }
+  }, [navigate, location.search, showAlert]);
 
   useEffect(() => {
     updateVerificationStatus();
@@ -63,6 +103,16 @@ function Verify() {
           the login page soon, please do not leave this page
         </Typography>
       </Card>
+      <Backdrop
+        sx={{
+          color: "#fff",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backgroundColor: theme.palette.text.primary,
+        }}
+        open={openBackDrop}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Container>
   );
 }

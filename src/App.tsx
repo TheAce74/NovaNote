@@ -11,6 +11,7 @@ import { theme } from "./mui/theme";
 import ResetPassword from "./features/auth/ResetPassword";
 import Protected from "./features/guard/Protected";
 import Verify from "./features/auth/Verify";
+import ConfirmResetPassword from "./features/auth/ConfirmResetPassword";
 
 function App() {
   const router = createBrowserRouter([
@@ -49,6 +50,10 @@ function App() {
         {
           path: "/verify",
           element: <Verify />,
+        },
+        {
+          path: "/confirmReset",
+          element: <ConfirmResetPassword />,
         },
       ],
     },

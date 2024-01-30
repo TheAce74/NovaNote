@@ -23,13 +23,13 @@ function Protected({ children }: ProtectedProps) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        console.log(user);
         const {
           uid,
           email,
+          emailVerified,
           metadata: { creationTime },
         } = user;
-        await getFireBaseUserDetails(uid, email, creationTime);
+        await getFireBaseUserDetails(uid, email, emailVerified, creationTime);
       } else {
         dispatch(
           setUser({
