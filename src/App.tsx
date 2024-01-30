@@ -12,6 +12,9 @@ import ResetPassword from "./features/auth/ResetPassword";
 import Protected from "./features/guard/Protected";
 import Verify from "./features/auth/Verify";
 import ConfirmResetPassword from "./features/auth/ConfirmResetPassword";
+import Home from "./features/dashboard/components/Home";
+import Settings from "./features/dashboard/components/Settings";
+import Documents from "./features/dashboard/components/Documents";
 
 function App() {
   const router = createBrowserRouter([
@@ -34,6 +37,20 @@ function App() {
               <Dashboard />
             </Protected>
           ),
+          children: [
+            {
+              path: "/",
+              element: <Home />,
+            },
+            {
+              path: "/settings",
+              element: <Settings />,
+            },
+            {
+              path: "/documents",
+              element: <Documents />,
+            },
+          ],
         },
         {
           path: "/register",
