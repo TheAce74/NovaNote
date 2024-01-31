@@ -29,20 +29,23 @@ export interface IResetPasswordFormInput {
   email: string;
 }
 
+export interface INotes {
+  [id: string]: {
+    title: string;
+    text: string;
+  };
+}
+
 export interface IUser {
   id: string | null;
   username: string | null;
   email: string | null;
   emailVerified: boolean;
   creationTime: string | undefined;
+  notes: INotes | "";
 }
 
 export interface IFireBaseSnapShot {
   username: string;
-  emailVerified: boolean;
-}
-
-export interface IVerifyUser {
-  id: string;
-  username: string;
+  notes: INotes | "";
 }

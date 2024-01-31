@@ -62,6 +62,7 @@ function Register() {
         const user = userCredential.user;
         await setFireBaseUserDetails(user.uid, {
           username: username,
+          notes: "",
         });
         const currentUser = auth.currentUser ? auth.currentUser : user;
         await sendEmailVerification(currentUser).then(() => {

@@ -8,6 +8,7 @@ const initialState: IUser = {
   email: null,
   emailVerified: false,
   creationTime: undefined,
+  notes: "",
 };
 
 export const userSlice = createSlice({

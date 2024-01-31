@@ -38,6 +38,7 @@ function Protected({ children }: ProtectedProps) {
             username: null,
             emailVerified: false,
             creationTime: undefined,
+            notes: "",
           })
         );
         navigate("/login");

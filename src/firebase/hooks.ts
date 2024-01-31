@@ -26,7 +26,7 @@ function useFireBase() {
     await get(child(dbRef, `users/${id}`))
       .then(async (snapshot) => {
         if (snapshot.exists()) {
-          const { username } = snapshot.val() as IFireBaseSnapShot;
+          const { username, notes } = snapshot.val() as IFireBaseSnapShot;
           dispatch(
             setUser({
               id,
@@ -34,6 +34,7 @@ function useFireBase() {
               email,
               emailVerified,
               creationTime,
+              notes
             })
           );
         } else {
