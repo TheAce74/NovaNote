@@ -9,7 +9,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
-import AccountCircle from "@mui/icons-material/AccountCircle";
+import Avatar from "@mui/material/Avatar";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import { styled, Theme, CSSObject } from "@mui/material/styles";
@@ -175,7 +175,13 @@ function Dashboard() {
               onClick={handleMenu}
               color="inherit"
             >
-              <AccountCircle />
+              <Avatar
+                src=""
+                sx={{
+                  width: 40,
+                  height: 40,
+                }}
+              />
             </IconButton>
             <Menu
               id="menu-appbar"
@@ -242,7 +248,7 @@ function Dashboard() {
                   minHeight: 48,
                   justifyContent: open ? "initial" : "center",
                   px: 2.5,
-                  py: 2
+                  py: 2,
                 }}
                 onClick={() => handleNavigate(text)}
               >
@@ -267,7 +273,7 @@ function Dashboard() {
           ))}
         </List>
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, px: 2, py: 1 }}>
+      <Box component="main" sx={{ flexGrow: 1, px: 2, py: 2.5 }}>
         <DrawerHeader />
         <Outlet />
         <Backdrop

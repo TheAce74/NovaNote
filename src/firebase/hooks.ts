@@ -1,10 +1,5 @@
 import { ref, child, get, set } from "firebase/database";
-import {
-  deleteUser,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-  updatePassword,
-} from "firebase/auth";
+import { User, deleteUser, sendEmailVerification } from "firebase/auth";
 import { db, auth } from "./firebase";
 import { getErrorMessage } from "../utils/errorMessage";
 import { useAlert } from "../hooks/useAlert";
@@ -34,7 +29,7 @@ function useFireBase() {
               email,
               emailVerified,
               creationTime,
-              notes
+              notes,
             })
           );
         } else {
@@ -69,48 +64,19 @@ function useFireBase() {
       });
   };
 
-  //unused
-  const reAuthenticateUser = async (
-    email: string,
-    password: string,
-    callback: () => void
-  ) => {
-    const credential = EmailAuthProvider.credential(email, password);
-    const user = auth.currentUser;
-    if (user) {
-      await reauthenticateWithCredential(user, credential)
-        .then(() => {
-          callback();
-        })
-        .catch((error) => {
-          showAlert(getErrorMessage(error), { variant: "error" });
-        });
-    } else {
-      showAlert("User not found", { variant: "error" });
-    }
-  };
-
-  //unused
-  const changeUserPassword = async (newPassword: string) => {
-    const user = auth.currentUser;
-    if (user) {
-      await updatePassword(user, newPassword)
-        .then(() => {
-          showAlert("Password changed successfully", { variant: "success" });
-        })
-        .catch((error) => {
-          showAlert(getErrorMessage(error), { variant: "error" });
-        });
-    } else {
-      showAlert("User not found", { variant: "error" });
+  const sendVerificationEmail = async (user?: User) => {
+    const currentUser = auth.currentUser ? auth.currentUser : user;
+    if (currentUser) {
+      await sendEmailVerification(currentUser).then(() => {
+        showAlert("A verification email was sent to your inbox");
+      });
     }
   };
 
   return {
     getFireBaseUserDetails,
     setFireBaseUserDetails,
-    reAuthenticateUser,
-    changeUserPassword,
+    sendVerificationEmail,
   };
 }
 

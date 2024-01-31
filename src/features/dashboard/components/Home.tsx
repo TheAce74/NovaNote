@@ -18,7 +18,7 @@ function Home() {
   const user = useAppSelector((state) => state.user);
   const [checked, setChecked] = useState<string[]>([]);
   const [filter, setFilter] = useState("");
-  const notes = Object.keys(user.notes);
+  const notes = Object.keys(user.notes).reverse();
 
   const handleToggle = (value: string) => () => {
     const currentIndex = checked.indexOf(value);
@@ -104,9 +104,6 @@ function Home() {
         <TextField
           id="search-input"
           label="Search recent document by title"
-          sx={{
-            flex: 1,
-          }}
           onChange={handleSearch}
           fullWidth
         />

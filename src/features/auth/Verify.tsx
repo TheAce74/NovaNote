@@ -31,14 +31,6 @@ function Verify() {
           },
         });
         break;
-      case "recoverEmail":
-        navigate("/recoverEmail", {
-          state: {
-            actionCode: parsed.oobCode,
-            lang: parsed.lang || "en",
-          },
-        });
-        break;
       case "verifyEmail":
         setOpenBackDrop(false);
         if (typeof parsed.oobCode === "string") {

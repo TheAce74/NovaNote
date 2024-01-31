@@ -11,10 +11,7 @@ import { useAppTheme } from "../../mui/hooks";
 import { IRegisterFormInputs } from "../../utils/types";
 import { useAlert } from "../../hooks/useAlert";
 import { Link } from "react-router-dom";
-import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-} from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { getErrorMessage } from "../../utils/errorMessage";
 import { useState } from "react";
 import { auth } from "../../firebase/firebase";
@@ -42,7 +39,7 @@ function Register() {
   const theme = useAppTheme();
   const { showAlert } = useAlert();
   const [loading, setLoading] = useState(false);
-  const { setFireBaseUserDetails } = useFireBase();
+  const { setFireBaseUserDetails, sendVerificationEmail } = useFireBase();
   const [showPassword1, setShowPassword1] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
 
@@ -64,10 +61,7 @@ function Register() {
           username: username,
           notes: "",
         });
-        const currentUser = auth.currentUser ? auth.currentUser : user;
-        await sendEmailVerification(currentUser).then(() => {
-          showAlert("A verification email was sent to your inbox");
-        });
+        await sendVerificationEmail(user);
         reset();
       })
       .catch((error: unknown) => {
