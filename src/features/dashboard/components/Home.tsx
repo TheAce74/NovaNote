@@ -139,6 +139,7 @@ function Home() {
           `${user.notes ? user.notes[item].title : "NovaNote"}.docx`
         );
       }
+      setChecked([]);
     }
   };
 

@@ -11,14 +11,39 @@ import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import EditNote from "@mui/icons-material/EditNote";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { filterUserNotes } from "../../../utils/filter";
+import { useCreateDocument } from "../hooks/useCreateDocument";
+import { useAlert } from "../../../hooks/useAlert";
+import { useDeleteDocuments } from "../hooks/useDeleteDocuments";
+import { styled } from "@mui/material/styles";
+import { validateFile } from "../../../utils/functions";
+import mammoth from "mammoth";
+import { useImportDocument } from "../hooks/useImportDocument";
+import { useNavigate } from "react-router-dom";
+import { saveAs } from "file-saver";
+import { asBlob } from "html-docx-js-typescript-modify";
+
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
 
 function Documents() {
   const user = useAppSelector((state) => state.user);
   const [checked, setChecked] = useState<string[]>([]);
   const [filter, setFilter] = useState("");
   const notes = Object.keys(user.notes).reverse();
+  const { showAlert } = useAlert();
+  const [textContent, setTextContent] = useState("");
+  const navigate = useNavigate();
 
   const handleToggle = (value: string) => () => {
     const currentIndex = checked.indexOf(value);
@@ -35,6 +60,87 @@ function Documents() {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value.trim());
+  };
+
+  const { createModal, openCreateModal } = useCreateDocument();
+  const { deleteModal, openDeleteModal } = useDeleteDocuments(checked);
+  const { importModal, openImportModal } = useImportDocument(textContent);
+
+  const handleDelete = () => {
+    if (checked.length === 0) {
+      showAlert("Select at least one document", {
+        variant: "error",
+      });
+    } else {
+      openDeleteModal();
+    }
+  };
+
+  const handleImport = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+
+    if (file) {
+      const report = validateFile(file);
+      if (report[0]) {
+        if (
+          file.type ===
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ) {
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            const result = await mammoth.convertToHtml({ arrayBuffer });
+            setTextContent(result.value);
+            openImportModal();
+          } catch (err) {
+            console.error(err);
+            showAlert("Error extracting text from .docx file.", {
+              variant: "error",
+            });
+          }
+        } else if (file.type === "text/plain") {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            if (e.target?.result) {
+              setTextContent(e.target.result as string);
+              openImportModal();
+            }
+          };
+          reader.onerror = () => {
+            showAlert("Error reading .txt file.", {
+              variant: "error",
+            });
+          };
+          reader.readAsText(file);
+        }
+      } else {
+        showAlert(report[1], {
+          variant: "error",
+        });
+      }
+    }
+  };
+
+  const handleEdit = (id: string) => {
+    if (user.notes) {
+      navigate(`/documents/${user.id}/${user.notes[id].title}`);
+    }
+  };
+
+  const handleExport = async () => {
+    if (checked.length === 0) {
+      showAlert("Select at least one document", {
+        variant: "error",
+      });
+    } else {
+      for (const item of checked) {
+        const data = await asBlob(user.notes ? user.notes[item].text : "");
+        saveAs(
+          data as Blob,
+          `${user.notes ? user.notes[item].title : "NovaNote"}.docx`
+        );
+      }
+      setChecked([]);
+    }
   };
 
   return (
@@ -60,22 +166,32 @@ function Documents() {
           sx={{
             padding: 2.5,
           }}
+          onClick={openCreateModal}
         >
           Create document
         </Button>
         <Button
+          component="label"
+          role={undefined}
           variant="contained"
+          tabIndex={-1}
           sx={{
             padding: 2.5,
           }}
         >
           Import document
+          <VisuallyHiddenInput
+            type="file"
+            onChange={handleImport}
+            accept=".txt,.docx"
+          />
         </Button>
         <Button
           variant="contained"
           sx={{
             padding: 2.5,
           }}
+          onClick={handleExport}
         >
           Export document(s)
         </Button>
@@ -84,6 +200,7 @@ function Documents() {
           sx={{
             padding: 2.5,
           }}
+          onClick={handleDelete}
         >
           Delete document(s)
         </Button>
@@ -111,7 +228,12 @@ function Documents() {
                     <ListItem
                       key={note}
                       secondaryAction={
-                        <IconButton edge="end" aria-label="edit note">
+                        <IconButton
+                          edge="end"
+                          aria-label="edit document"
+                          title="Edit document"
+                          onClick={() => handleEdit(note)}
+                        >
                           <EditNote />
                         </IconButton>
                       }
@@ -152,6 +274,9 @@ function Documents() {
           </List>
         </Box>
       </Box>
+      {createModal}
+      {deleteModal}
+      {importModal}
     </Box>
   );
 }
