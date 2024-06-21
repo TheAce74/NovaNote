@@ -14,12 +14,15 @@ import EditNote from "@mui/icons-material/EditNote";
 import { useState } from "react";
 import { filterUserNotes } from "../../../utils/filter";
 import { useCreateDocument } from "../hooks/useCreateDocument";
+import { useAlert } from "../../../hooks/useAlert";
+import { useDeleteDocuments } from "../hooks/useDeleteDocuments";
 
 function Home() {
   const user = useAppSelector((state) => state.user);
   const [checked, setChecked] = useState<string[]>([]);
   const [filter, setFilter] = useState("");
   const notes = Object.keys(user.notes).reverse();
+  const { showAlert } = useAlert();
 
   const handleToggle = (value: string) => () => {
     const currentIndex = checked.indexOf(value);
@@ -39,6 +42,17 @@ function Home() {
   };
 
   const { createModal, openCreateModal } = useCreateDocument();
+  const { deleteModal, openDeleteModal } = useDeleteDocuments(checked);
+
+  const handleDelete = () => {
+    if (checked.length === 0) {
+      showAlert("Select at least one document", {
+        variant: "error",
+      });
+    } else {
+      openDeleteModal();
+    }
+  };
 
   return (
     <Box component="section">
@@ -98,6 +112,7 @@ function Home() {
             sx={{
               padding: 2.5,
             }}
+            onClick={handleDelete}
           >
             Delete document(s)
           </Button>
@@ -183,6 +198,7 @@ function Home() {
         </Box>
       </Box>
       {createModal}
+      {deleteModal}
     </Box>
   );
 }

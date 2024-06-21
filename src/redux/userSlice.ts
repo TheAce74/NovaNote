@@ -45,9 +45,13 @@ export const userSlice = createSlice({
         state.notes[id].text = text;
       }
     },
+    setNotes: (state, action: PayloadAction<INotes>) => {
+      state.notes = action.payload;
+    },
   },
 });
 
-export const { setUser, addNote, editTitle, editNote } = userSlice.actions;
+export const { setUser, addNote, editTitle, editNote, setNotes } =
+  userSlice.actions;
 
 export default userSlice.reducer;
