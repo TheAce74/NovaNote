@@ -103,7 +103,7 @@ function useDeleteDocuments(checked: string[]) {
                   fontStyle: "italic",
                 }}
               >
-                {notes ? notes[item].title : ""}
+                {notes ? notes[item]?.title : ""}
               </li>
             ))}
           </ul>

@@ -20,6 +20,9 @@ import { styled } from "@mui/material/styles";
 import { validateFile } from "../../../utils/functions";
 import mammoth from "mammoth";
 import { useImportDocument } from "../hooks/useImportDocument";
+import { useNavigate } from "react-router-dom";
+import { saveAs } from "file-saver";
+import { asBlob } from "html-docx-js-typescript-modify";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -40,6 +43,7 @@ function Home() {
   const notes = Object.keys(user.notes).reverse();
   const { showAlert } = useAlert();
   const [textContent, setTextContent] = useState("");
+  const navigate = useNavigate();
 
   const handleToggle = (value: string) => () => {
     const currentIndex = checked.indexOf(value);
@@ -116,6 +120,28 @@ function Home() {
     }
   };
 
+  const handleEdit = (id: string) => {
+    if (user.notes) {
+      navigate(`/documents/${user.id}/${user.notes[id].title}`);
+    }
+  };
+
+  const handleExport = async () => {
+    if (checked.length === 0) {
+      showAlert("Select at least one document", {
+        variant: "error",
+      });
+    } else {
+      for (const item of checked) {
+        const data = await asBlob(user.notes ? user.notes[item].text : "");
+        saveAs(
+          data as Blob,
+          `${user.notes ? user.notes[item].title : "NovaNote"}.docx`
+        );
+      }
+    }
+  };
+
   return (
     <Box component="section">
       <Typography
@@ -174,6 +200,7 @@ function Home() {
             sx={{
               padding: 2.5,
             }}
+            onClick={handleExport}
           >
             Export document(s)
           </Button>
@@ -224,8 +251,9 @@ function Home() {
                         secondaryAction={
                           <IconButton
                             edge="end"
-                            aria-label="edit note"
+                            aria-label="edit document"
                             title="Edit document"
+                            onClick={() => handleEdit(note)}
                           >
                             <EditNote />
                           </IconButton>
