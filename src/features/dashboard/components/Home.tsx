@@ -11,11 +11,27 @@ import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import EditNote from "@mui/icons-material/EditNote";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { filterUserNotes } from "../../../utils/filter";
 import { useCreateDocument } from "../hooks/useCreateDocument";
 import { useAlert } from "../../../hooks/useAlert";
 import { useDeleteDocuments } from "../hooks/useDeleteDocuments";
+import { styled } from "@mui/material/styles";
+import { validateFile } from "../../../utils/functions";
+import mammoth from "mammoth";
+import { useImportDocument } from "../hooks/useImportDocument";
+
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
 
 function Home() {
   const user = useAppSelector((state) => state.user);
@@ -23,6 +39,7 @@ function Home() {
   const [filter, setFilter] = useState("");
   const notes = Object.keys(user.notes).reverse();
   const { showAlert } = useAlert();
+  const [textContent, setTextContent] = useState("");
 
   const handleToggle = (value: string) => () => {
     const currentIndex = checked.indexOf(value);
@@ -43,6 +60,7 @@ function Home() {
 
   const { createModal, openCreateModal } = useCreateDocument();
   const { deleteModal, openDeleteModal } = useDeleteDocuments(checked);
+  const { importModal, openImportModal } = useImportDocument(textContent);
 
   const handleDelete = () => {
     if (checked.length === 0) {
@@ -51,6 +69,50 @@ function Home() {
       });
     } else {
       openDeleteModal();
+    }
+  };
+
+  const handleImport = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+
+    if (file) {
+      const report = validateFile(file);
+      if (report[0]) {
+        if (
+          file.type ===
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ) {
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            const result = await mammoth.convertToHtml({ arrayBuffer });
+            setTextContent(result.value);
+            openImportModal();
+          } catch (err) {
+            console.error(err);
+            showAlert("Error extracting text from .docx file.", {
+              variant: "error",
+            });
+          }
+        } else if (file.type === "text/plain") {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            if (e.target?.result) {
+              setTextContent(e.target.result as string);
+              openImportModal();
+            }
+          };
+          reader.onerror = () => {
+            showAlert("Error reading .txt file.", {
+              variant: "error",
+            });
+          };
+          reader.readAsText(file);
+        }
+      } else {
+        showAlert(report[1], {
+          variant: "error",
+        });
+      }
     }
   };
 
@@ -92,12 +154,20 @@ function Home() {
             Create document
           </Button>
           <Button
+            component="label"
+            role={undefined}
             variant="contained"
+            tabIndex={-1}
             sx={{
               padding: 2.5,
             }}
           >
             Import document
+            <VisuallyHiddenInput
+              type="file"
+              onChange={handleImport}
+              accept=".txt,.docx"
+            />
           </Button>
           <Button
             variant="contained"
@@ -199,6 +269,7 @@ function Home() {
       </Box>
       {createModal}
       {deleteModal}
+      {importModal}
     </Box>
   );
 }
