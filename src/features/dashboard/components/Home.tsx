@@ -13,6 +13,7 @@ import IconButton from "@mui/material/IconButton";
 import EditNote from "@mui/icons-material/EditNote";
 import { useState } from "react";
 import { filterUserNotes } from "../../../utils/filter";
+import { useCreateDocument } from "../hooks/useCreateDocument";
 
 function Home() {
   const user = useAppSelector((state) => state.user);
@@ -36,6 +37,8 @@ function Home() {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value.trim());
   };
+
+  const { createModal, openCreateModal } = useCreateDocument();
 
   return (
     <Box component="section">
@@ -70,6 +73,7 @@ function Home() {
             sx={{
               padding: 2.5,
             }}
+            onClick={openCreateModal}
           >
             Create document
           </Button>
@@ -88,6 +92,14 @@ function Home() {
             }}
           >
             Export document(s)
+          </Button>
+          <Button
+            variant="contained"
+            sx={{
+              padding: 2.5,
+            }}
+          >
+            Delete document(s)
           </Button>
         </Box>
       </Box>
@@ -125,7 +137,11 @@ function Home() {
                       <ListItem
                         key={note}
                         secondaryAction={
-                          <IconButton edge="end" aria-label="edit note">
+                          <IconButton
+                            edge="end"
+                            aria-label="edit note"
+                            title="Edit document"
+                          >
                             <EditNote />
                           </IconButton>
                         }
@@ -166,6 +182,7 @@ function Home() {
           </List>
         </Box>
       </Box>
+      {createModal}
     </Box>
   );
 }

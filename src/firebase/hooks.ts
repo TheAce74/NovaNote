@@ -6,10 +6,13 @@ import { useAlert } from "../hooks/useAlert";
 import { useAppDispatch } from "../redux/hooks";
 import { setUser } from "../redux/userSlice";
 import { IFireBaseSnapShot } from "../utils/types";
+import { getKeys } from "../utils/functions";
+import { useNavigate } from "react-router-dom";
 
 function useFireBase() {
   const { showAlert } = useAlert();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const getFireBaseUserDetails = async (
     id: string,
@@ -73,10 +76,41 @@ function useFireBase() {
     }
   };
 
+  const getFireBaseDetails = async (
+    id: string,
+    title: string
+  ): Promise<string> => {
+    const dbRef = ref(db);
+    return await get(child(dbRef, `users/${id}`))
+      .then(async (snapshot) => {
+        if (snapshot.exists()) {
+          const { notes } = snapshot.val() as IFireBaseSnapShot;
+          if (notes) {
+            const keys = getKeys(notes);
+            const key = keys.filter((key) => notes[key].title === title)[0];
+            if (!key) {
+              throw new Error("Document doesn't exist");
+            }
+            return notes[key].text;
+          } else {
+            throw new Error("Document doesn't exist");
+          }
+        } else {
+          throw new Error("No data available, check the url and try again");
+        }
+      })
+      .catch((error: unknown) => {
+        showAlert(getErrorMessage(error), { variant: "error" });
+        navigate("/", { replace: true });
+        return "";
+      });
+  };
+
   return {
     getFireBaseUserDetails,
     setFireBaseUserDetails,
     sendVerificationEmail,
+    getFireBaseDetails,
   };
 }
 

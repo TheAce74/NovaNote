@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { IUser } from "../utils/types";
+import { INotes, IUser } from "../utils/types";
 
 const initialState: IUser = {
   id: null,
@@ -18,9 +18,36 @@ export const userSlice = createSlice({
     setUser: (_, action: PayloadAction<IUser>) => {
       return action.payload;
     },
+    addNote: (state, action: PayloadAction<INotes>) => {
+      state.notes = { ...state.notes, ...action.payload };
+    },
+    editTitle: (
+      state,
+      action: PayloadAction<{
+        id: number;
+        title: string;
+      }>
+    ) => {
+      const { id, title } = action.payload;
+      if (state.notes) {
+        state.notes[id].title = title;
+      }
+    },
+    editNote: (
+      state,
+      action: PayloadAction<{
+        id: number;
+        text: string;
+      }>
+    ) => {
+      const { id, text } = action.payload;
+      if (state.notes) {
+        state.notes[id].text = text;
+      }
+    },
   },
 });
 
-export const { setUser } = userSlice.actions;
+export const { setUser, addNote, editTitle, editNote } = userSlice.actions;
 
 export default userSlice.reducer;

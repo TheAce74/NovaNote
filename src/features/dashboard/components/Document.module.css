@@ -1,0 +1,25 @@
+.body > div {
+  min-height: 62dvh;
+  font-family: "Ubuntu", sans-serif;
+  font-size: 1rem;
+}
+
+.read {
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.btn:is(:hover, :focus-visible) {
+  color: #1a5e63;
+}
+
+.btn:active {
+  scale: 0.9;
+}

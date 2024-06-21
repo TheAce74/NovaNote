@@ -5,7 +5,7 @@ const filterUserNotes = (notes: string[], user: IUser, filter: string) => {
     if (user.notes !== "") {
       return user.notes[note].title
         .toLowerCase()
-        .startsWith(filter.toLowerCase());
+        .includes(filter.toLowerCase());
     }
   });
 };

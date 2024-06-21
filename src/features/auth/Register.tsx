@@ -206,6 +206,7 @@ function Register() {
               fontSize: "1.1rem",
               fontWeight: 600,
             }}
+            disabled={loading}
           >
             {!loading ? (
               <Box component="span">Register</Box>

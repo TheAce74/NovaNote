@@ -182,7 +182,7 @@ function ConfirmResetPassword() {
           <Button onClick={handleClose} variant="outlined">
             Cancel
           </Button>
-          <Button type="submit" variant="contained">
+          <Button type="submit" variant="contained" disabled={loading}>
             {!loading ? (
               <Box component="span">Submit</Box>
             ) : (

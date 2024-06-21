@@ -15,6 +15,7 @@ import ConfirmResetPassword from "./features/auth/ConfirmResetPassword";
 import Home from "./features/dashboard/components/Home";
 import Settings from "./features/dashboard/components/Settings";
 import Documents from "./features/dashboard/components/Documents";
+import Document from "./features/dashboard/components/Document";
 
 function App() {
   const router = createBrowserRouter([
@@ -49,6 +50,10 @@ function App() {
             {
               path: "/documents",
               element: <Documents />,
+            },
+            {
+              path: "/documents/:user/:title",
+              element: <Document />,
             },
           ],
         },
