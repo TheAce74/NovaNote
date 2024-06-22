@@ -138,6 +138,8 @@ function useFireBase() {
               dispatch(updateProfilePic(url));
             } catch (e) {
               console.error(e);
+            } finally {
+              callback();
             }
           })
           .catch((error) => {
@@ -146,9 +148,6 @@ function useFireBase() {
       })
       .catch((error) => {
         showAlert(getErrorMessage(error), { variant: "error" });
-      })
-      .finally(() => {
-        callback();
       });
   };
 
