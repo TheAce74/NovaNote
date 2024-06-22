@@ -4,7 +4,7 @@ import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useAppTheme } from "../../mui/hooks";
 import { useState } from "react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
@@ -28,6 +28,7 @@ import House from "@mui/icons-material/House";
 import Settings from "@mui/icons-material/Settings";
 import Description from "@mui/icons-material/Description";
 import { useAppSelector } from "../../redux/hooks";
+import { NAV_LINKS } from "../../utils/constants";
 
 const drawerWidth = 180;
 
@@ -107,6 +108,7 @@ function Dashboard() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const { profilePic } = useAppSelector((state) => state.user);
+  const location = useLocation();
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -125,13 +127,7 @@ function Dashboard() {
   };
 
   const handleNavigate = (text: string) => {
-    if (text === "Settings") {
-      navigate("/settings");
-    } else if (text === "Documents") {
-      navigate("/documents");
-    } else {
-      navigate("/");
-    }
+    navigate(NAV_LINKS[text]);
   };
 
   const handleLogOut = () => {
@@ -251,6 +247,11 @@ function Dashboard() {
                   justifyContent: open ? "initial" : "center",
                   px: 2.5,
                   py: 2,
+                  backgroundColor: `${
+                    location.pathname === NAV_LINKS[text]
+                      ? theme.palette.primary.main
+                      : ""
+                  } !important`,
                 }}
                 onClick={() => handleNavigate(text)}
               >
@@ -259,6 +260,11 @@ function Dashboard() {
                     minWidth: 0,
                     mr: open ? 3 : "auto",
                     justifyContent: "center",
+                    color: `${
+                      location.pathname === NAV_LINKS[text]
+                        ? theme.palette.background.paper
+                        : ""
+                    } !important`,
                   }}
                 >
                   {index === 0 ? (
@@ -269,7 +275,17 @@ function Dashboard() {
                     <Settings />
                   )}
                 </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
+                <ListItemText
+                  primary={text}
+                  sx={{
+                    opacity: open ? 1 : 0,
+                    color: `${
+                      location.pathname === NAV_LINKS[text]
+                        ? theme.palette.background.paper
+                        : ""
+                    } !important`,
+                  }}
+                />
               </ListItemButton>
             </ListItem>
           ))}
