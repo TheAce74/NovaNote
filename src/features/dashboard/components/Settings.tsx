@@ -5,7 +5,7 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useAppSelector } from "../../../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import { ChangeEvent, useState } from "react";
 import { useAppTheme } from "../../../mui/hooks";
 import { format } from "date-fns";
@@ -13,6 +13,7 @@ import { useFireBase } from "../../../firebase/hooks";
 import { styled } from "@mui/material/styles";
 import { validateImage } from "../../../utils/functions";
 import { useAlert } from "../../../hooks/useAlert";
+import { updateUserName } from "../../../redux/userSlice";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -36,14 +37,13 @@ function Settings() {
   const { sendVerificationEmail, setProfilePic } = useFireBase();
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [changeNameLoading, setChangeNameLoading] = useState(false);
   const { showAlert } = useAlert();
+  const { setFireBaseUserDetails } = useFireBase();
+  const dispatch = useAppDispatch();
 
   const handleUserName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserName(e.target.value);
-  };
-
-  const handleUserNameDisabled = () => {
-    setUserNameDisabled(!userNameDisabled);
   };
 
   const handleEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,6 +73,31 @@ function Settings() {
           variant: "error",
         });
       }
+    }
+  };
+
+  const handleUpdateUserName = async () => {
+    if (userName?.trim() === user.username?.trim()) {
+      showAlert("No changes have been made");
+      return;
+    }
+    setChangeNameLoading(true);
+    try {
+      await setFireBaseUserDetails(
+        user.id ?? "",
+        {
+          username: userName,
+          notes: user.notes,
+          profilePic: user.profilePic,
+        },
+        "Updated successfully"
+      );
+      dispatch(updateUserName(userName ?? ""));
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setChangeNameLoading(false);
+      setUserNameDisabled(true);
     }
   };
 
@@ -181,8 +206,31 @@ function Settings() {
             disabled={userNameDisabled}
             onChange={handleUserName}
           />
-          <Button variant="contained" onClick={handleUserNameDisabled}>
-            {userNameDisabled ? "Edit" : "Update"}
+          <Button
+            variant="contained"
+            onClick={
+              userNameDisabled
+                ? () => setUserNameDisabled(false)
+                : handleUpdateUserName
+            }
+            disabled={changeNameLoading}
+          >
+            {!changeNameLoading ? (
+              <Box component="span">{userNameDisabled ? "Edit" : "Update"}</Box>
+            ) : (
+              <Box
+                sx={{ display: "flex" }}
+                color={theme.palette.background.default}
+              >
+                <CircularProgress
+                  color="inherit"
+                  sx={{
+                    width: "1.8em !important",
+                    height: "1.8em !important",
+                  }}
+                />
+              </Box>
+            )}
           </Button>
         </Box>
         <Box
