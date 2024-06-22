@@ -59,7 +59,7 @@ function Protected({ children }: ProtectedProps) {
             profilePic: "",
           })
         );
-        navigate("/login");
+        navigate("/login", { replace: true });
       }
     });
 
