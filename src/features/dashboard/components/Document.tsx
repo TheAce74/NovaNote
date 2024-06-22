@@ -124,7 +124,7 @@ export default function Document() {
   const getDoc = useCallback(async () => {
     const text = await getFireBaseDetails(ownerId ?? "", title ?? "");
     setNote(text);
-  }, []);
+  }, [ownerId, title]);
 
   useEffect(() => {
     if (id === ownerId) {
@@ -144,7 +144,7 @@ export default function Document() {
     } else {
       getDoc();
     }
-  }, []);
+  }, [getDoc, id, ownerId, setNoteId, setReadOnly, showAlert, navigate]);
 
   useEffect(() => {
     if (quill) {
@@ -158,7 +158,7 @@ export default function Document() {
         setItem(`NovaNote (${title})`, quill.root.innerHTML);
       });
     }
-  }, [quill]);
+  }, [quill, note]);
 
   return (
     <Box component="section">

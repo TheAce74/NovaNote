@@ -11,7 +11,7 @@ import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import EditNote from "@mui/icons-material/EditNote";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useDeferredValue, useState } from "react";
 import { filterUserNotes } from "../../../utils/filter";
 import { useCreateDocument } from "../hooks/useCreateDocument";
 import { useAlert } from "../../../hooks/useAlert";
@@ -40,6 +40,7 @@ function Home() {
   const user = useAppSelector((state) => state.user);
   const [checked, setChecked] = useState<string[]>([]);
   const [filter, setFilter] = useState("");
+  const deferredFilter = useDeferredValue(filter);
   const notes = Object.keys(user.notes).reverse();
   const { showAlert } = useAlert();
   const [textContent, setTextContent] = useState("");
@@ -238,8 +239,8 @@ function Home() {
           }}
         >
           <List>
-            {filterUserNotes(notes, user, filter).length !== 0 ? (
-              filterUserNotes(notes, user, filter)
+            {filterUserNotes(notes, user, deferredFilter).length !== 0 ? (
+              filterUserNotes(notes, user, deferredFilter)
                 .slice(0, 10)
                 .map((note) => {
                   if (user.notes !== "") {
