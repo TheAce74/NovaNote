@@ -31,8 +31,6 @@ function Settings() {
   const user = useAppSelector((state) => state.user);
   const [userName, setUserName] = useState(user.username);
   const [userNameDisabled, setUserNameDisabled] = useState(true);
-  const [email, setEmail] = useState(user.email);
-  const [emailDisabled, setEmailDisabled] = useState(true);
   const theme = useAppTheme();
   const { sendVerificationEmail, setProfilePic } = useFireBase();
   const [verifyLoading, setVerifyLoading] = useState(false);
@@ -44,14 +42,6 @@ function Settings() {
 
   const handleUserName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserName(e.target.value);
-  };
-
-  const handleEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-  };
-
-  const handleEmailDisabled = () => {
-    setEmailDisabled(!emailDisabled);
   };
 
   const handleVerifyUser = async () => {
@@ -231,29 +221,6 @@ function Settings() {
                 />
               </Box>
             )}
-          </Button>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "stretch",
-            gap: 2,
-            flexWrap: "wrap",
-            marginTop: "1.5em",
-          }}
-        >
-          <TextField
-            id="email-input"
-            label="Email"
-            sx={{
-              flex: 1,
-            }}
-            value={email}
-            disabled={emailDisabled}
-            onChange={handleEmail}
-          />
-          <Button variant="contained" onClick={handleEmailDisabled}>
-            {emailDisabled ? "Edit" : "Update"}
           </Button>
         </Box>
         {!user.emailVerified && (
