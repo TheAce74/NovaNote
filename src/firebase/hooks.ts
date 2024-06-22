@@ -151,12 +151,27 @@ function useFireBase() {
       });
   };
 
+  const deleteAccount = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        await deleteUser(user);
+      } catch (error) {
+        console.error(error);
+        await deleteUser(user);
+      }
+      showAlert("Your unverified account has been deleted");
+      navigate("/register", { replace: true });
+    }
+  };
+
   return {
     getFireBaseUserDetails,
     setFireBaseUserDetails,
     sendVerificationEmail,
     getFireBaseDetails,
     setProfilePic,
+    deleteAccount,
   };
 }
 
