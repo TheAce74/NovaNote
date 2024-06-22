@@ -6,10 +6,25 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useAppSelector } from "../../../redux/hooks";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { useAppTheme } from "../../../mui/hooks";
 import { format } from "date-fns";
 import { useFireBase } from "../../../firebase/hooks";
+import { styled } from "@mui/material/styles";
+import { validateImage } from "../../../utils/functions";
+import { useAlert } from "../../../hooks/useAlert";
+
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: 1,
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: 1,
+});
 
 function Settings() {
   const user = useAppSelector((state) => state.user);
@@ -18,8 +33,10 @@ function Settings() {
   const [email, setEmail] = useState(user.email);
   const [emailDisabled, setEmailDisabled] = useState(true);
   const theme = useAppTheme();
-  const { sendVerificationEmail } = useFireBase();
+  const { sendVerificationEmail, setProfilePic } = useFireBase();
   const [verifyLoading, setVerifyLoading] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const { showAlert } = useAlert();
 
   const handleUserName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserName(e.target.value);
@@ -41,6 +58,22 @@ function Settings() {
     setVerifyLoading(true);
     await sendVerificationEmail();
     setVerifyLoading(false);
+  };
+
+  const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+
+    if (file) {
+      const report = validateImage(file);
+      if (report[0]) {
+        setUploadLoading(true);
+        await setProfilePic(user.id ?? "", file, () => setUploadLoading(false));
+      } else {
+        showAlert(report[1], {
+          variant: "error",
+        });
+      }
+    }
   };
 
   return (
@@ -69,13 +102,43 @@ function Settings() {
           }}
         >
           <Avatar
-            src=""
+            src={user.profilePic}
             sx={{
               width: 100,
               height: 100,
             }}
           />
-          <Button variant="contained">Update</Button>
+          <Button
+            component="label"
+            role={undefined}
+            variant="contained"
+            tabIndex={-1}
+            disabled={uploadLoading}
+          >
+            {!uploadLoading ? (
+              <>
+                Update
+                <VisuallyHiddenInput
+                  type="file"
+                  onChange={handleUpload}
+                  accept=".jpg,.png"
+                />
+              </>
+            ) : (
+              <Box
+                sx={{ display: "flex" }}
+                color={theme.palette.background.default}
+              >
+                <CircularProgress
+                  color="inherit"
+                  sx={{
+                    width: "1.8em !important",
+                    height: "1.8em !important",
+                  }}
+                />
+              </Box>
+            )}
+          </Button>
         </Box>
         {user.emailVerified ? (
           <Typography
@@ -151,7 +214,11 @@ function Settings() {
               *All unverified accounts are scheduled for deletion 3 days after
               creation
             </Typography>
-            <Button variant="contained" onClick={handleVerifyUser}>
+            <Button
+              variant="contained"
+              onClick={handleVerifyUser}
+              disabled={verifyLoading}
+            >
               {!verifyLoading ? (
                 <Box component="span">Verify Account</Box>
               ) : (

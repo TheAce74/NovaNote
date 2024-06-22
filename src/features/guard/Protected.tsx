@@ -39,6 +39,7 @@ function Protected({ children }: ProtectedProps) {
             emailVerified: false,
             creationTime: undefined,
             notes: "",
+            profilePic: "",
           })
         );
         navigate("/login");

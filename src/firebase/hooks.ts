@@ -1,18 +1,24 @@
 import { ref, child, get, set } from "firebase/database";
 import { User, deleteUser, sendEmailVerification } from "firebase/auth";
-import { db, auth } from "./firebase";
+import { db, auth, storage } from "./firebase";
 import { getErrorMessage } from "../utils/errorMessage";
 import { useAlert } from "../hooks/useAlert";
-import { useAppDispatch } from "../redux/hooks";
-import { setUser } from "../redux/userSlice";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { setUser, updateProfilePic } from "../redux/userSlice";
 import { IFireBaseSnapShot } from "../utils/types";
 import { getKeys } from "../utils/functions";
 import { useNavigate } from "react-router-dom";
+import {
+  getDownloadURL,
+  ref as storageRef,
+  uploadBytes,
+} from "firebase/storage";
 
 function useFireBase() {
   const { showAlert } = useAlert();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { username, notes } = useAppSelector((state) => state.user);
 
   const getFireBaseUserDetails = async (
     id: string,
@@ -24,7 +30,8 @@ function useFireBase() {
     await get(child(dbRef, `users/${id}`))
       .then(async (snapshot) => {
         if (snapshot.exists()) {
-          const { username, notes } = snapshot.val() as IFireBaseSnapShot;
+          const { username, notes, profilePic } =
+            snapshot.val() as IFireBaseSnapShot;
           dispatch(
             setUser({
               id,
@@ -33,6 +40,7 @@ function useFireBase() {
               emailVerified,
               creationTime,
               notes,
+              profilePic,
             })
           );
         } else {
@@ -62,7 +70,7 @@ function useFireBase() {
       })
       .catch((error) => {
         if (message) {
-          showAlert(getErrorMessage(error), { variant: "success" });
+          showAlert(getErrorMessage(error), { variant: "error" });
         }
       });
   };
@@ -106,11 +114,50 @@ function useFireBase() {
       });
   };
 
+  const setProfilePic = async (
+    id: string,
+    data: File | Blob,
+    callback: () => void
+  ) => {
+    showAlert("Uploading...");
+    const userRef = storageRef(storage, `users/${id}.jpg`);
+    uploadBytes(userRef, data)
+      .then(() => {
+        getDownloadURL(userRef)
+          .then(async (url) => {
+            try {
+              await setFireBaseUserDetails(
+                id ?? "",
+                {
+                  username,
+                  notes,
+                  profilePic: url,
+                },
+                "Uploaded successfully"
+              );
+              dispatch(updateProfilePic(url));
+            } catch (e) {
+              console.error(e);
+            }
+          })
+          .catch((error) => {
+            showAlert(getErrorMessage(error), { variant: "error" });
+          });
+      })
+      .catch((error) => {
+        showAlert(getErrorMessage(error), { variant: "error" });
+      })
+      .finally(() => {
+        callback();
+      });
+  };
+
   return {
     getFireBaseUserDetails,
     setFireBaseUserDetails,
     sendVerificationEmail,
     getFireBaseDetails,
+    setProfilePic,
   };
 }
 

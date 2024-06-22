@@ -27,6 +27,7 @@ import ListItemText from "@mui/material/ListItemText";
 import House from "@mui/icons-material/House";
 import Settings from "@mui/icons-material/Settings";
 import Description from "@mui/icons-material/Description";
+import { useAppSelector } from "../../redux/hooks";
 
 const drawerWidth = 180;
 
@@ -105,6 +106,7 @@ function Dashboard() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { profilePic } = useAppSelector((state) => state.user);
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -176,7 +178,7 @@ function Dashboard() {
               color="inherit"
             >
               <Avatar
-                src=""
+                src={profilePic}
                 sx={{
                   width: 40,
                   height: 40,

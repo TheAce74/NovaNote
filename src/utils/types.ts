@@ -43,9 +43,11 @@ export interface IUser {
   emailVerified: boolean;
   creationTime: string | undefined;
   notes: INotes | "";
+  profilePic: string;
 }
 
 export interface IFireBaseSnapShot {
   username: string;
   notes: INotes | "";
+  profilePic: string;
 }

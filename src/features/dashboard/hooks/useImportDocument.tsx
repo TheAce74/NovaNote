@@ -30,7 +30,9 @@ function useImportDocument(text: string) {
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const { showAlert } = useAlert();
-  const { id, username, notes } = useAppSelector((state) => state.user);
+  const { id, username, notes, profilePic } = useAppSelector(
+    (state) => state.user
+  );
   const { setFireBaseUserDetails } = useFireBase();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -63,6 +65,7 @@ function useImportDocument(text: string) {
               text,
             },
           },
+          profilePic,
         },
         "Imported successfully"
       );

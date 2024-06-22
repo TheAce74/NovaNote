@@ -30,7 +30,9 @@ function useEditTitle(docId: number, prevTitle: string) {
   const [title, setTitle] = useState(prevTitle);
   const [loading, setLoading] = useState(false);
   const { showAlert } = useAlert();
-  const { id, username, notes } = useAppSelector((state) => state.user);
+  const { id, username, notes, profilePic } = useAppSelector(
+    (state) => state.user
+  );
   const { setFireBaseUserDetails } = useFireBase();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -68,6 +70,7 @@ function useEditTitle(docId: number, prevTitle: string) {
               text: notes ? notes[docId].text : "",
             },
           },
+          profilePic,
         },
         "Edited successfully"
       );

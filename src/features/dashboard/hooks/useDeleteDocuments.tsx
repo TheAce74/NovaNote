@@ -26,7 +26,9 @@ const style = {
 function useDeleteDocuments(checked: string[]) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { id, username, notes } = useAppSelector((state) => state.user);
+  const { id, username, notes, profilePic } = useAppSelector(
+    (state) => state.user
+  );
   const { setFireBaseUserDetails } = useFireBase();
   const dispatch = useAppDispatch();
 
@@ -57,6 +59,7 @@ function useDeleteDocuments(checked: string[]) {
         {
           username,
           notes: newNotes,
+          profilePic,
         },
         "Deleted successfully"
       );

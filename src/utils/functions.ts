@@ -26,3 +26,17 @@ export const validateFile = (file: File): [boolean, string] => {
   }
   return [true, ""];
 };
+
+export const validateImage = (file: File): [boolean, string] => {
+  const allowedExtensions = /(\.jpg|\.png)$/i;
+  const maxFileSize = 5 * 1024 * 1024;
+
+  if (!allowedExtensions.exec(file.name)) {
+    return [false, "Invalid file type. Only .jpg and .png files are allowed."];
+  }
+
+  if (file.size > maxFileSize) {
+    return [false, "File size exceeds 5MB."];
+  }
+  return [true, ""];
+};

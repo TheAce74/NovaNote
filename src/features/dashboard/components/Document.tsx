@@ -18,7 +18,9 @@ import { useFireBase } from "../../../firebase/hooks";
 import { editNote } from "../../../redux/userSlice";
 
 export default function Document() {
-  const { notes, id, username } = useAppSelector((state) => state.user);
+  const { notes, id, username, profilePic } = useAppSelector(
+    (state) => state.user
+  );
   const { user: ownerId, title } = useParams();
   const [note, setNote] = useState("");
   const { showAlert } = useAlert();
@@ -104,6 +106,7 @@ export default function Document() {
               text: getItem(`NovaNote (${title})`),
             },
           },
+          profilePic,
         },
         "Saved successfully"
       );

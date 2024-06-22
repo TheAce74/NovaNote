@@ -9,6 +9,7 @@ const initialState: IUser = {
   emailVerified: false,
   creationTime: undefined,
   notes: "",
+  profilePic: "",
 };
 
 export const userSlice = createSlice({
@@ -48,10 +49,19 @@ export const userSlice = createSlice({
     setNotes: (state, action: PayloadAction<INotes>) => {
       state.notes = action.payload;
     },
+    updateProfilePic: (state, action: PayloadAction<string>) => {
+      state.profilePic = action.payload;
+    },
   },
 });
 
-export const { setUser, addNote, editTitle, editNote, setNotes } =
-  userSlice.actions;
+export const {
+  setUser,
+  addNote,
+  editTitle,
+  editNote,
+  setNotes,
+  updateProfilePic,
+} = userSlice.actions;
 
 export default userSlice.reducer;

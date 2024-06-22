@@ -60,6 +60,7 @@ function Register() {
         await setFireBaseUserDetails(user.uid, {
           username: username,
           notes: "",
+          profilePic: "",
         });
         await sendVerificationEmail(user);
         reset();
