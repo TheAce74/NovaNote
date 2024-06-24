@@ -40,3 +40,8 @@ export const validateImage = (file: File): [boolean, string] => {
   }
   return [true, ""];
 };
+
+export const getStringSizeInBytes = (text: string) => {
+  const blob = new Blob([text], { type: "text/plain" });
+  return blob.size;
+};

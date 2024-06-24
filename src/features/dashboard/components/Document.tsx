@@ -3,10 +3,8 @@ import Typography from "@mui/material/Typography";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import { useNavigate, useParams } from "react-router-dom";
 import Button from "@mui/material/Button";
-import { useQuill } from "react-quilljs";
-import "quill/dist/quill.snow.css";
 import { useCallback, useEffect, useState } from "react";
-import { getKeys } from "../../../utils/functions";
+import { getKeys, getStringSizeInBytes } from "../../../utils/functions";
 import { useAlert } from "../../../hooks/useAlert";
 import styles from "./Document.module.css";
 import { MdEdit } from "react-icons/md";
@@ -16,6 +14,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { theme } from "../../../mui/theme";
 import { useFireBase } from "../../../firebase/hooks";
 import { editNote } from "../../../redux/userSlice";
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
 
 export default function Document() {
   const { notes, id, username, profilePic } = useAppSelector(
@@ -29,7 +29,6 @@ export default function Document() {
   const [noteId, setNoteId] = useState(Infinity);
   const [loading, setLoading] = useState(false);
 
-  const quillTheme = "snow";
   const modules = {
     toolbar: [
       ["bold", "italic", "underline", "strike"],
@@ -71,13 +70,6 @@ export default function Document() {
     "align",
     "clean",
   ];
-  const { quill, quillRef } = useQuill({
-    theme: quillTheme,
-    modules,
-    formats,
-    placeholder,
-    readOnly,
-  });
 
   const { openEditTitleModal, editTitleModal } = useEditTitle(
     noteId,
@@ -148,20 +140,6 @@ export default function Document() {
       getDoc();
     }
   }, [getDoc, id, ownerId, setNoteId, setReadOnly, showAlert, navigate]);
-
-  useEffect(() => {
-    if (quill) {
-      quill.clipboard.dangerouslyPasteHTML(
-        getItem(`NovaNote (${title})`)
-          ? (getItem(`NovaNote (${title})`) as string)
-          : note
-      );
-      quill.enable(!readOnly);
-      quill.on("text-change", () => {
-        setItem(`NovaNote (${title})`, quill.root.innerHTML);
-      });
-    }
-  }, [quill, note]);
 
   return (
     <Box component="section">
@@ -248,14 +226,21 @@ export default function Document() {
           marginTop: "2em",
           maxWidth: "90dvw",
         }}
+        className={styles.body}
       >
-        <div
-          ref={quillRef}
-          style={{
-            minHeight: "69dvh",
-            width: "100%",
+        <ReactQuill
+          theme="snow"
+          value={(getItem(`NovaNote (${title})`) as string) ?? note}
+          onChange={(value) => {
+            if (getStringSizeInBytes(value) <= 5e6) {
+              setItem(`NovaNote (${title})`, value);
+            }
+            setNote(value);
           }}
-          className={styles.body}
+          readOnly={readOnly}
+          modules={modules}
+          placeholder={placeholder}
+          formats={formats}
         />
       </div>
       {editTitleModal}

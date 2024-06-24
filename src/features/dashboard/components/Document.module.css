@@ -1,5 +1,5 @@
-.body > div {
-  min-height: 62dvh;
+.body [contenteditable="true"] {
+  min-height: 69dvh;
   font-family: "Ubuntu", sans-serif;
   font-size: 1rem;
 }
